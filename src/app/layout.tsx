@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "./components/sidebar/sidebar";
-import GlobalStyleProvider from "./providers/GlobalStyleProvider";
+import { SessionProvider } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,13 +16,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { data: session, status } = useSession();
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <GlobalStyleProvider>
-          <Sidebar />
-          {children}
-        </GlobalStyleProvider>
+        <SessionProvider>
+          <header>
+            {status === "loading" ? (
+              <p>Loading...</p>
+            ) : session ? (
+              <div>
+                <span>Welcome, {session.user?.email}</span>
+                <button onClick={() => signOut()}>Logout</button>
+              </div>
+            ) : (
+              <div>
+                <a href="/auth/login">Login</a>
+                <a href="/auth/register">Register</a>
+              </div>
+            )}
+          </header>
+          <main>{children}</main>
+        </SessionProvider>
       </body>
     </html>
   );
