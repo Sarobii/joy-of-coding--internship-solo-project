@@ -14,13 +14,20 @@ const generateRandomName = () => {
 
 const SessionStatus = () => {
   const { data: session, status } = useSession();
-  const [guestName, setGuestName] = useState("");
+  const [guestName, setGuestName] = useState(session?.user?.name === "Guest" ? session.user.name : "");
 
   useEffect(() => {
-    if (session?.user?.name === "Guest") {
-      setGuestName(generateRandomName());
+    if (session?.user?.name === "Guest" && !guestName) {
+      const storedName = localStorage.getItem("guestName");
+      if (storedName) {
+        setGuestName(storedName);
+      } else {
+        const newName = generateRandomName();
+        setGuestName(newName);
+        localStorage.setItem("guestName", newName);
+      }
     }
-  }, [session]);
+  }, [session, guestName]);
 
   if (status === "loading") {
     return <button className="btn loading">Loading...</button>;
@@ -40,8 +47,8 @@ const SessionStatus = () => {
     <div className="flex space-x-4">
       <a href="/auth/login" className="btn btn-secondary">Login</a>
       <a href="/auth/register" className="btn btn-secondary">Register</a>
-      <button onClick={() => signIn("credentials", { email: "guest", password: "guest" })} className="btn btn-secondary">
-        Sign in as Guest
+      <button onClick={() => signIn("credentials", { email: "guest", password: "guest", name: guestName })} className="btn btn-secondary">
+        Guest
       </button>
     </div>
   );

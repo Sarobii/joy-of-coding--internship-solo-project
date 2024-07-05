@@ -13,6 +13,10 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,8 +26,12 @@ export default function RegisterForm() {
     if (res.ok) {
       router.push("/");
     } else {
-      const data = await res.json();
-      setError(data.error);
+      try {
+        const data = await res.json();
+        setError(data.error);
+      } catch (error) {
+        setError("Invalid response from server");
+      }
     }
   };
 
@@ -69,7 +77,6 @@ export default function RegisterForm() {
           required
           className="input input-bordered w-full max-w-xs"
         />
-        {password !== confirmPassword && <p className="text-error">Passwords do not match</p>}
         <button className="btn btn-primary w-full max-w-xs" type="submit">
           Register
         </button>

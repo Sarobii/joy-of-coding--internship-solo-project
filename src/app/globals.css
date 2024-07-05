@@ -4,15 +4,12 @@
 
 @import "daisyui/dist/full.css";
 
-
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     
   }
 }
-
-
 
 @layer utilities {
   .text-balance {

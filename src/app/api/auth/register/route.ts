@@ -1,28 +1,23 @@
-
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from 'next/server';
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
-  if (!req.body) {
-    return res.status(400).json({ error: "Request body is missing" });
-  }
-
-  const { email, password, name } = req.body;
-
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
+export async function POST(req: Request) {
   try {
+    const { email, password, name } = await req.json();
+
+    if (!email || !password || !name) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      return res.status(409).json({ error: "User already exists" });
+      return NextResponse.json({ error: "User already exists" }, { status: 409 });
     }
 
     const hashedPassword = await hash(password, 10);
@@ -35,9 +30,9 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    return res.status(201).json(user);
+    return NextResponse.json(user, { status: 201 });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Server error" });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

@@ -1,49 +1,65 @@
 'use client';
 
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useTasks } from './TaskProvider';
 
 export default function TaskForm() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const { addTask } = useTasks();
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-
-    const res = await fetch("/api/tasks/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description, dueDate }),
-    });
-
-    if (res.ok) {
-      const task = await res.json();
-      // Handle task creation success
-    }
+    await addTask({ name, description, dueDate });
+    setName("");
+    setDescription("");
+    setDueDate("");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Task Name"
-        required
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Task Description"
-        required
-      />
-      <input
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        required
-      />
-      <button type="submit">Add Task</button>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="form-control">
+        <label className="label" htmlFor="name">
+          <span className="label-text">Task Name</span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter task name"
+          required
+          className="input input-bordered w-full"
+        />
+      </div>
+      <div className="form-control">
+        <label className="label" htmlFor="description">
+          <span className="label-text">Task Description</span>
+        </label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter task description"
+          required
+          className="textarea textarea-bordered h-24"
+        />
+      </div>
+      <div className="form-control">
+        <label className="label" htmlFor="dueDate">
+          <span className="label-text">Due Date</span>
+        </label>
+        <input
+          type="date"
+          id="dueDate"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          required
+          className="input input-bordered w-full"
+        />
+      </div>
+      <button type="submit" className="btn btn-primary w-full">Add Task</button>
     </form>
   );
 }

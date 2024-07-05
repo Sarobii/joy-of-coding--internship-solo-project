@@ -26,10 +26,14 @@ const ThemeToggle = () => {
   if (theme === null) return null; // Render nothing until the theme is determined
 
   return (
-    <div className="tooltip tooltip-bottom" data-tip={theme === "cupcake" ? "Dark" : "Light"}>
-      <button onClick={toggleTheme} className="btn btn-circle btn-ghost btn-xs">
+    <div
+      className="tooltip tooltip-bottom"
+      data-tip={theme === "cupcake" ? "Dark" : "Light"}
+      onClick={toggleTheme}
+    >
+      <div className="btn btn-ghost btn- flex items-center justify-center">
         {theme === "cupcake" ? <Moon size={16} /> : <Sun size={16} />}
-      </button>
+      </div>
     </div>
   );
 };
