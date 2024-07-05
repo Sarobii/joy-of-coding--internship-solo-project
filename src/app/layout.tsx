@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import { useSession, signOut } from "next-auth/react";
+import SessionProviderWrapper from "../components/SessionProviderWrapper";
+import SessionStatus from "../components/SessionStatus";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,32 +13,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const { data: session, status } = useSession();
-
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProvider>
+        <SessionProviderWrapper>
           <header>
-            {status === "loading" ? (
-              <p>Loading...</p>
-            ) : session ? (
-              <div>
-                <span>Welcome, {session.user?.email}</span>
-                <button onClick={() => signOut()}>Logout</button>
-              </div>
-            ) : (
-              <div>
-                <a href="/auth/login">Login</a>
-                <a href="/auth/register">Register</a>
-              </div>
-            )}
+            <SessionStatus />
           </header>
           <main>{children}</main>
-        </SessionProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
