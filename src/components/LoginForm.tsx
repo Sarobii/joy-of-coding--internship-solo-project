@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,6 +21,8 @@ export default function LoginForm() {
 
     if (result?.error) {
       setError(result.error);
+    } else {
+      router.push("/"); // Redirect to the home page after successful login
     }
   };
 
@@ -29,6 +33,8 @@ export default function LoginForm() {
         <input
           type="email"
           value={email}
+          id="email"
+          autoComplete="email"
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           required
@@ -37,6 +43,8 @@ export default function LoginForm() {
         <input
           type="password"
           value={password}
+          id="password"
+          autoComplete="current-password"
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           required

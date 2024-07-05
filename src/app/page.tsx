@@ -7,9 +7,9 @@ import TaskForm from "../components/TaskForm";
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
-  // if (!session) {
-  //   redirect("/auth/login");
-  // }
+  if (!session) {
+    redirect("/auth/login");
+  }
 
   return (
     <div>
