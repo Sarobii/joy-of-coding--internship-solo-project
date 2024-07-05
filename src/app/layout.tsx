@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import SessionProviderWrapper from "../components/SessionProviderWrapper";
 import SessionStatus from "../components/SessionStatus";
+import ThemeToggle from "../components/ThemeToggle";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <SessionProviderWrapper>
-          <header>
+          <header className="flex justify-between items-center p-4">
             <SessionStatus />
+            <ThemeToggle />
           </header>
           <main>{children}</main>
         </SessionProviderWrapper>

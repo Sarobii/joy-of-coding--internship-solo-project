@@ -1,42 +1,46 @@
-
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import { compare } from "bcryptjs";
-import { NextApiHandler } from "next";
-import { NextAuthOptions } from "next-auth";
 
 const prisma = new PrismaClient();
 
-const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
+      authorize: async (credentials) => {
+        if (!credentials) {
           return null;
         }
-      
+
+        if (credentials.email === "guest" && credentials.password === "guest") {
+          return { id: "guest", name: "Guest", email: "guest@example.com" };
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-      
-        if (user && await compare(credentials.password, user.password)) {
+
+        if (user && (await compare(credentials.password, user.password))) {
           return {
-            id: user.id.toString(), // Convert the id to a string
-            email: user.email,
+            id: user.id.toString(),
             name: user.name,
+            email: user.email,
           };
         }
-        
+
         return null;
-      }
+      },
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -45,16 +49,17 @@ const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
+      if (session.user) {
+        session.user.id = token.id as string;
       }
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/auth/login",
+  },
 };
 
-const authHandler: NextApiHandler = (req, res) => NextAuth(req, res, authOptions);
+const handler = NextAuth(authOptions);
 
-export { authHandler as GET, authHandler as POST };
-export { authOptions };
+export { handler as GET, handler as POST };
