@@ -9,9 +9,17 @@ export default function TaskForm() {
   const [dueDate, setDueDate] = useState("");
   const { addTask } = useTasks();
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addTask({ name, description, dueDate });
+    const taskToAdd = {
+      name,
+      description,
+      dueDate,
+      status: "To Do",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    await addTask(taskToAdd);
     setName("");
     setDescription("");
     setDueDate("");

@@ -1,62 +1,79 @@
 'use client';
 
-import React, { ReactNode, useState, useEffect, createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Create a context for tasks
-const TaskContext = createContext<{
-  tasks: any[];
-  addTask: (newTask: any) => Promise<void>;
-  fetchTasks: () => Promise<void>;
-}>({
-  tasks: [],
-  addTask: () => Promise.resolve(),
-  fetchTasks: () => Promise.resolve(),
-});
+interface Task {
+  id: string;
+  name: string;
+  description: string;
+  dueDate: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export function TaskProvider({ children }: { children: ReactNode }) {
-  const [tasks, setTasks] = useState<any[]>([]);
+interface TaskContextType {
+  tasks: Task[];
+  addTask: (task: Omit<Task, 'id'>) => Promise<void>;
+  updateTaskStatus: (id: string, status: string) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
+}
 
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch("/api/tasks");
-      if (!res.ok) {
-        throw new Error("Failed to fetch tasks");
-      }
-      const data = await res.json();
-      setTasks(data);
-    } catch (error) {
-      console.error("Failed to fetch tasks:", error);
-    }
-  };
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-  const addTask = async (newTask: any) => {
-    try {
-      const res = await fetch("/api/tasks/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTask),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to add task");
-      }
-      const task = await res.json();
-      setTasks(prevTasks => [...prevTasks, task]);
-    } catch (error) {
-      console.error("Failed to add task:", error);
-    }
-  };
+export default function TaskProvider({ children }: { children: React.ReactNode }) {
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
+  const fetchTasks = async () => {
+    const response = await fetch('/api/tasks');
+    const data = await response.json();
+    setTasks(data);
+  };
+
+  const addTask = async (task: Omit<Task, 'id'>) => {
+    const response = await fetch('/api/tasks/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    });
+    const newTask = await response.json();
+    setTasks([...tasks, newTask]);
+  };
+
+  const updateTaskStatus = async (id: string, status: string) => {
+    const response = await fetch('/api/tasks/update', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    });
+    const updatedTask = await response.json();
+    setTasks(tasks.map(task => task.id === id ? updatedTask : task));
+  };
+
+  const deleteTask = async (id: string) => {
+    await fetch('/api/tasks/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks, addTask, fetchTasks }}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTaskStatus, deleteTask }}>
       {children}
     </TaskContext.Provider>
   );
 }
 
-export const useTasks = () => useContext(TaskContext);
-
-export default TaskProvider;
+export function useTasks() {
+  const context = useContext(TaskContext);
+  if (context === undefined) {
+    throw new Error('useTasks must be used within a TaskProvider');
+  }
+  return context;
+}
