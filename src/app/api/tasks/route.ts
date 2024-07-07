@@ -1,23 +1,37 @@
-import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient()
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const sort = searchParams.get('sort');
+  const filter = searchParams.get('filter');
 
-export async function GET(_req: any) {
+  let orderBy: any = { createdAt: 'desc' };
+  let where: any = {};
+
+  if (sort === 'name') {
+    orderBy = { name: 'asc' };
+  } else if (sort === 'dueDate') {
+    orderBy = { dueDate: 'asc' };
+  }
+
+  if (filter === 'todo') {
+    where.status = 'TODO';
+  } else if (filter === 'inProgress') {
+    where.status = 'IN_PROGRESS';
+  } else if (filter === 'done') {
+    where.status = 'DONE';
+  }
+
   try {
-    const tasks = await prisma.task.findMany()
-    return new Response(JSON.stringify(tasks), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    const tasks = await prisma.task.findMany({
+      where,
+      orderBy,
+    });
+
+    return NextResponse.json(tasks);
   } catch (error) {
-    console.error('Request error', error)
-    return new Response(JSON.stringify({ error: 'Error fetching tasks' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    console.error('Request error', error);
+    return NextResponse.json({ error: 'Error fetching tasks' }, { status: 500 });
   }
 }
