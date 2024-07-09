@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import TaskForm from "@/components/TaskForm";
+import TaskForm from "@/components/AddTaskForm";
 import TaskList from "@/components/TaskList";
 import TaskProvider from "@/components/TaskProvider";
 

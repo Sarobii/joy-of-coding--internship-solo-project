@@ -1,7 +1,9 @@
 'use client';
 
-import React from "react";
+import React, { useState } from "react";
 import { useTasks } from "./TaskProvider";
+import EditTaskForm from "./EditTaskForm";
+import { Task } from "@prisma/client";
 
 const statusColors = {
   "To Do": "bg-yellow-100",
@@ -11,6 +13,7 @@ const statusColors = {
 
 export default function TaskList() {
   const { tasks, updateTaskStatus, deleteTask } = useTasks();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const handleStatusChange = (id: string, status: string) => {
     updateTaskStatus(id, status);
@@ -55,6 +58,12 @@ export default function TaskList() {
                     <option value="Finished!">Finished!</option>
                   </select>
                   <button
+                    onClick={() => setEditingTask(task)}
+                    className="btn btn-sm btn-secondary"
+                  >
+                    Edit
+                  </button>
+                  <button
                     onClick={() => handleDelete(task.id)}
                     className="btn btn-sm btn-error"
                   >
@@ -65,6 +74,16 @@ export default function TaskList() {
             </li>
           ))}
         </ul>
+      )}
+      {editingTask && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <EditTaskForm 
+              task={editingTask} 
+              onClose={() => setEditingTask(null)} 
+            />
+          </div>
+        </div>
       )}
     </div>
   );
