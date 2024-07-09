@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useTasks } from './TaskProvider';
-import { Task } from '@prisma/client';
+import React, { useState } from "react";
+import { useTasks } from "./TaskProvider";
+import { Task } from "@prisma/client";
 
 interface EditTaskFormProps {
   task: Task;
@@ -11,8 +11,13 @@ interface EditTaskFormProps {
 
 export default function EditTaskForm({ task, onClose }: EditTaskFormProps) {
   const [name, setName] = useState(task.name);
-  const [description, setDescription] = useState(task.description || '');
-  const [dueDate, setDueDate] = useState(task.dueDate.toISOString().split('T')[0]);
+  const [description, setDescription] = useState(task.description || "");
+  const [dueDate, setDueDate] = useState(() => {
+    if (task.dueDate instanceof Date) {
+      return task.dueDate.toISOString().split("T")[0];
+    }
+    return task.dueDate;
+  });
   const { updateTask } = useTasks();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,8 +73,16 @@ export default function EditTaskForm({ task, onClose }: EditTaskFormProps) {
           className="input input-bordered w-full"
         />
       </div>
-      <button type="submit" className="btn btn-primary w-full">Update Task</button>
-      <button type="button" onClick={onClose} className="btn btn-secondary w-full">Cancel</button>
+      <button type="submit" className="btn btn-primary w-full">
+        Update Task
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        className="btn btn-secondary w-full"
+      >
+        Cancel
+      </button>
     </form>
   );
 }

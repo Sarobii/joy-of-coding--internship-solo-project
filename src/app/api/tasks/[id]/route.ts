@@ -21,7 +21,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-// Add PATCH for updating only the status
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
@@ -37,6 +36,22 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     console.error('Error updating task status:', error);
     return NextResponse.json(
       { error: 'Failed to update task status' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+    await prisma.task.delete({
+      where: { id },
+    });
+    return NextResponse.json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete task' },
       { status: 500 }
     );
   }

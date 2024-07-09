@@ -103,7 +103,10 @@ export default function TaskProvider({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(task),
+      body: JSON.stringify({
+        ...task,
+        dueDate: new Date(task.dueDate).toISOString(),
+      }),
     });
     const updatedTask = await response.json();
     setTasks((prevTasks) =>
@@ -128,8 +131,12 @@ export default function TaskProvider({
 
   const deleteTask = async (id: string) => {
     // Delete task from the backend
-    await fetch(`/api/tasks/${id}`, {
+    await fetch(`/api/tasks/delete`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
     });
     setTasks((prevTasks) => prevTasks.filter((t) => t.id !== id));
   };
