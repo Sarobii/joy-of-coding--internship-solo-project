@@ -1,4 +1,3 @@
-// pages/protected.tsx
 
 import { getSession } from 'next-auth/react';
 import { GetServerSideProps } from 'next';

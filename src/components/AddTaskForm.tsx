@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useTasks } from './TaskProvider';
+import React, { useState } from "react";
+import { useTasks } from "./TaskProvider";
 
 export default function TaskForm() {
   const [name, setName] = useState("");
@@ -14,7 +14,7 @@ export default function TaskForm() {
     const taskToAdd = {
       name,
       description,
-      dueDate,
+      dueDate: new Date(dueDate),
       status: "To Do",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -67,7 +67,9 @@ export default function TaskForm() {
           className="input input-bordered w-full"
         />
       </div>
-      <button type="submit" className="btn btn-primary w-full">Add Task</button>
+      <button type="submit" className="btn btn-primary w-full">
+        Add Task
+      </button>
     </form>
   );
 }
