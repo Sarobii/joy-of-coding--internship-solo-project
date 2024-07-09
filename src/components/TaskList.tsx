@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useTasks } from "./TaskProvider";
 import EditTaskForm from "./EditTaskForm";
 import { Task } from "@prisma/client";
+import FilterSort from "./FilterSort";
 
 const statusColors = {
   "To Do": "bg-yellow-100",
@@ -12,11 +13,11 @@ const statusColors = {
 };
 
 export default function TaskList() {
-  const { tasks, updateTaskStatus, deleteTask } = useTasks();
+  const { tasks, filteredTasks, updateTaskStatus, deleteTask } = useTasks();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const handleStatusChange = (id: string, status: string) => {
-    updateTaskStatus(id, status);
+   updateTaskStatus(id, status);
   };
 
   const handleDelete = (id: string) => {
@@ -28,11 +29,12 @@ export default function TaskList() {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Task List</h2>
-      {tasks.length === 0 ? (
+      <FilterSort />
+      {filteredTasks.length === 0 ? (
         <p className="text-base-content opacity-60">No tasks added yet.</p>
       ) : (
         <ul className="space-y-4">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <li
               key={task.id}
               className={`card ${
