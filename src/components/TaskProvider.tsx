@@ -17,6 +17,7 @@ interface TaskContextType {
   addTask: (task: Omit<Task, 'id'>) => Promise<void>;
   updateTaskStatus: (id: string, status: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  updateTask: (task: Task) => Promise<void>; 
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -63,8 +64,18 @@ export default function TaskProvider({ children }: { children: React.ReactNode }
     setTasks(tasks.filter(task => task.id !== id));
   };
 
+  const updateTask = async (task: Task) => {
+    const response = await fetch(`/api/tasks/${task.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(task),
+    });
+    const updatedTask = await response.json();
+    setTasks(tasks.map(t => t.id === task.id ? updatedTask : t));
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks, addTask, updateTaskStatus, deleteTask }}>
+    <TaskContext.Provider value={{ tasks, addTask, updateTaskStatus, deleteTask, updateTask }}>
       {children}
     </TaskContext.Provider>
   );
