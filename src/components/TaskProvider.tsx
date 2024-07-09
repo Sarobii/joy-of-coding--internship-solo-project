@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task } from '@prisma/client';
+import { toast } from 'react-hot-toast'; 
 
 interface TaskContextType {
   tasks: Task[];
@@ -21,68 +22,112 @@ export default function TaskProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const fetchTasks = async () => {
-    const response = await fetch('/api/tasks');
-    const data = await response.json();
-    setTasks(data.map((task: any) => ({
-      ...task,
-      dueDate: new Date(task.dueDate),
-      createdAt: new Date(task.createdAt),
-      updatedAt: new Date(task.updatedAt)
-    })));
+    try {
+      const response = await fetch('/api/tasks');
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
+      }
+      const data = await response.json();
+      setTasks(data.map((task: any) => ({
+        ...task,
+        dueDate: new Date(task.dueDate),
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt)
+      })));
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      toast.error('Failed to fetch tasks. Please try again.');
+    }
   };
 
   const addTask = async (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const response = await fetch('/api/tasks/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(task),
-    });
-    const newTask = await response.json();
-    setTasks([...tasks, {
-      ...newTask,
-      dueDate: new Date(newTask.dueDate),
-      createdAt: new Date(newTask.createdAt),
-      updatedAt: new Date(newTask.updatedAt)
-    }]);
+    try {
+      const response = await fetch('/api/tasks/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add task');
+      }
+      const newTask = await response.json();
+      setTasks([...tasks, {
+        ...newTask,
+        dueDate: new Date(newTask.dueDate),
+        createdAt: new Date(newTask.createdAt),
+        updatedAt: new Date(newTask.updatedAt)
+      }]);
+      toast.success('Task added successfully');
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast.error('Failed to add task. Please try again.');
+    }
   };
 
   const updateTask = async (task: Task) => {
-    const response = await fetch(`/api/tasks/${task.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(task),
-    });
-    const updatedTask = await response.json();
-    setTasks(tasks.map(t => t.id === task.id ? {
-      ...updatedTask,
-      dueDate: new Date(updatedTask.dueDate),
-      createdAt: new Date(updatedTask.createdAt),
-      updatedAt: new Date(updatedTask.updatedAt)
-    } : t));
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(task),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+      const updatedTask = await response.json();
+      setTasks(tasks.map(t => t.id === task.id ? {
+        ...updatedTask,
+        dueDate: new Date(updatedTask.dueDate),
+        createdAt: new Date(updatedTask.createdAt),
+        updatedAt: new Date(updatedTask.updatedAt)
+      } : t));
+      toast.success('Task updated successfully');
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast.error('Failed to update task. Please try again.');
+    }
   };
 
   const updateTaskStatus = async (id: string, status: string) => {
-    const response = await fetch('/api/tasks/update', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status }),
-    });
-    const updatedTask = await response.json();
-    setTasks(tasks.map(task => task.id === id ? {
-      ...updatedTask,
-      dueDate: new Date(updatedTask.dueDate),
-      createdAt: new Date(updatedTask.createdAt),
-      updatedAt: new Date(updatedTask.updatedAt)
-    } : task));
+    try {
+      const response = await fetch('/api/tasks/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update task status');
+      }
+      const updatedTask = await response.json();
+      setTasks(tasks.map(task => task.id === id ? {
+        ...updatedTask,
+        dueDate: new Date(updatedTask.dueDate),
+        createdAt: new Date(updatedTask.createdAt),
+        updatedAt: new Date(updatedTask.updatedAt)
+      } : task));
+      toast.success('Task status updated successfully');
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast.error('Failed to update task status. Please try again.');
+    }
   };
 
   const deleteTask = async (id: string) => {
-    await fetch('/api/tasks/delete', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    setTasks(tasks.filter(task => task.id !== id));
+    try {
+      const response = await fetch('/api/tasks/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+      setTasks(tasks.filter(task => task.id !== id));
+      toast.success('Task deleted successfully');
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.error('Failed to delete task. Please try again.');
+    }
   };
 
   return (
